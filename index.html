@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="APRENDTK - Plataforma educativa de clases grabadas, teoría, coding labs y retos técnicos.">
+<title>APRENDTK v2 — Learning Platform</title>
+<style>
+:root{
+  --bg:#07111f;--panel:#0d1a2b;--panel2:#111f33;--card:#12243a;
+  --text:#f4f7fb;--muted:#91a2b8;--line:#21344c;--primary:#6c63ff;
+  --primary2:#8c7dff;--cyan:#20d6c7;--green:#39d98a;--yellow:#ffd166;
+  --danger:#ff647c;--shadow:0 20px 60px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(135deg,#06101d,#0a1424 55%,#0b1728);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{display:grid;grid-template-columns:270px 1fr;min-height:100vh}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:270px;background:rgba(7,17,31,.96);border-right:1px solid var(--line);padding:22px 16px;z-index:20;overflow:auto}
+.brand{display:flex;gap:12px;align-items:center;padding:4px 8px 24px}
+.logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--primary),var(--cyan));font-weight:900;box-shadow:0 10px 30px rgba(108,99,255,.25)}
+.brand b{font-size:21px}.brand small{display:block;color:var(--muted);font-size:10px;margin-top:2px;letter-spacing:1px}
+.nav-title{font-size:10px;color:#5f728b;text-transform:uppercase;letter-spacing:1.5px;margin:18px 10px 8px}
+.nav button{width:100%;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:#aebdd0;padding:12px;border-radius:11px;text-align:left;margin:3px 0}
+.nav button:hover,.nav button.active{background:#14243a;color:#fff}.nav button.active{box-shadow:inset 3px 0 var(--primary)}
+.icon{width:22px;text-align:center}
+.side-bottom{position:absolute;bottom:20px;left:16px;right:16px}
+.user-mini{display:flex;gap:10px;align-items:center;padding:12px;background:#101f32;border:1px solid var(--line);border-radius:15px}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#20d6c7,#6c63ff);font-weight:800}
+.user-mini small{color:var(--muted)}
+.main{grid-column:2;min-width:0}
+.topbar{height:72px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:15px;padding:0 28px;position:sticky;top:0;background:rgba(7,17,31,.9);backdrop-filter:blur(18px);z-index:15}
+.menu-mobile{display:none}.search{max-width:520px;flex:1;position:relative}.search input{width:100%;background:#101e31;border:1px solid var(--line);border-radius:12px;padding:11px 15px 11px 40px;color:#fff;outline:none}.search span{position:absolute;left:14px;top:10px;color:var(--muted)}
+.top-actions{margin-left:auto;display:flex;gap:8px}.circle-btn{width:40px;height:40px;border:1px solid var(--line);background:#101e31;color:#fff;border-radius:11px}
+.content{padding:30px;max-width:1500px;margin:auto}
+.view{display:none}.view.active{display:block}
+.hero{background:linear-gradient(120deg,#14294a,#16233c 55%,#172b43);border:1px solid #284361;border-radius:24px;padding:32px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.hero:after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;right:-80px;top:-130px;background:radial-gradient(circle,rgba(108,99,255,.45),transparent 65%)}
+.eyebrow{color:var(--cyan);font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}
+h1{font-size:clamp(30px,4vw,52px);line-height:1.02;margin:12px 0}.hero p{max-width:700px;color:#b8c7d9;font-size:16px;line-height:1.7}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.btn{border:0;border-radius:11px;padding:11px 16px;font-weight:750}.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary2)}.btn-secondary{background:#1b304a;color:#fff;border:1px solid #2d4865}.btn-danger{background:#381b28;color:#ff9bac}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:18px}.stat strong{display:block;font-size:27px}.stat span{color:var(--muted);font-size:12px}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:30px 0 14px}.section-head h2{margin:0;font-size:20px}.section-head p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.course{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:.2s}.course:hover{transform:translateY(-3px);border-color:#385577}
+.course-cover{height:155px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(135deg,#1b3150,#1a2343)}
+.cover-python{background:linear-gradient(135deg,#0c4855,#1c3155)}.cover-js{background:linear-gradient(135deg,#4a3a13,#2d263e)}.cover-data{background:linear-gradient(135deg,#3b1f52,#172d4a)}
+.badge{display:inline-flex;width:max-content;border-radius:20px;padding:5px 9px;font-size:10px;font-weight:800;background:#ffffff18;border:1px solid #ffffff24}.course-cover strong{font-size:19px;max-width:80%}
+.course-body{padding:16px}.course-body p{color:var(--muted);font-size:13px;line-height:1.55}.meta{display:flex;gap:12px;color:#8295ad;font-size:11px}.progress{height:7px;background:#1b2a3d;border-radius:10px;overflow:hidden;margin:12px 0}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--cyan));border-radius:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px}
+.filters{display:flex;gap:9px;flex-wrap:wrap;margin:15px 0}.filter{border:1px solid var(--line);background:#101f32;color:#9eb0c6;padding:8px 12px;border-radius:20px}.filter.active{background:#241f5a;color:#fff;border-color:#6258ef}
+.lesson-layout{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:18px}.player{background:#02060b;border-radius:18px;overflow:hidden;border:1px solid var(--line)}.player video{width:100%;aspect-ratio:16/9;display:block;background:#02060b}
+.youtube-player{width:100%;aspect-ratio:16/9;border:0;display:block;background:#02060b}
+.video-actions{display:flex;gap:8px;flex-wrap:wrap;padding:12px;background:#08111e;border-top:1px solid var(--line)}
+.video-actions a{text-decoration:none;display:inline-flex;align-items:center}.player-placeholder{aspect-ratio:16/9;display:grid;place-items:center;background:radial-gradient(circle,#1a2d48,#03070d 65%);text-align:center;padding:30px}.play-big{width:75px;height:75px;border-radius:50%;border:0;background:var(--primary);color:#fff;font-size:27px;margin-bottom:15px}.lesson-info{padding:20px}.lesson-info h2{margin:0 0 8px}.lesson-info p{color:var(--muted);line-height:1.7}.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-top:16px}.tab{border:0;background:transparent;color:var(--muted);padding:12px 15px;border-bottom:2px solid transparent}.tab.active{color:#fff;border-color:var(--primary)}
+.lesson-list{max-height:650px;overflow:auto}.lesson-item{display:flex;gap:11px;padding:13px;border-bottom:1px solid #1a2b40;cursor:pointer}.lesson-item:hover,.lesson-item.active{background:#13243a}.lesson-num{width:28px;height:28px;border-radius:8px;background:#172941;display:grid;place-items:center;font-size:11px}.lesson-item b{font-size:12px}.lesson-item small{display:block;color:var(--muted);margin-top:3px}
+.lab{display:grid;grid-template-columns:1fr 1fr;gap:14px}.editor{background:#07101b;border:1px solid var(--line);border-radius:15px;overflow:hidden}.editor-head{padding:10px 12px;background:#0f1d2e;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.editor textarea{width:100%;min-height:330px;resize:vertical;border:0;outline:0;background:#07101b;color:#d9e5f3;padding:16px;font-family:"SFMono-Regular",Consolas,monospace;font-size:13px;line-height:1.55}.preview{width:100%;min-height:380px;border:0;background:#fff;border-radius:0}
+.challenge-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.challenge h3{margin:0 0 8px}.challenge p,.challenge li{color:#9db0c5;line-height:1.65}.challenge .tests{margin-top:15px;padding:13px;border-radius:12px;background:#0a1524;border:1px solid var(--line)}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.chart{height:220px;display:flex;align-items:flex-end;gap:12px;padding:20px}.bar{flex:1;background:linear-gradient(180deg,var(--primary2),#263c69);border-radius:8px 8px 2px 2px;position:relative;min-height:10px}.bar span{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:#91a2b8}.bar label{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:10px;color:#71849c}
+.profile{display:grid;grid-template-columns:280px 1fr;gap:18px}.profile-card{text-align:center}.big-avatar{width:90px;height:90px;margin:auto;border-radius:50%;display:grid;place-items:center;font-size:30px;font-weight:900;background:linear-gradient(135deg,var(--primary),var(--cyan))}
+.achievement-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.achievement{padding:16px;border:1px solid var(--line);border-radius:14px;background:#0d1a2b}.achievement .medal{font-size:28px}.achievement p{color:var(--muted);font-size:12px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;place-items:center;z-index:50;padding:20px}.modal.open{display:grid}.modal-box{width:min(620px,100%);background:#0d1a2b;border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow)}.modal-box h2{margin-top:0}.form-row{display:grid;gap:6px;margin:13px 0}.form-row label{font-size:12px;color:#9db0c5}.form-row input,.form-row textarea,.form-row select{width:100%;background:#091525;color:#fff;border:1px solid var(--line);border-radius:10px;padding:11px;outline:0}
+.toast{position:fixed;right:22px;bottom:22px;background:#12243a;border:1px solid #34506e;color:#fff;padding:13px 16px;border-radius:12px;display:none;z-index:80;box-shadow:var(--shadow)}.toast.show{display:block}
+.empty{padding:35px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:16px}
+@media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.lesson-layout{grid-template-columns:1fr}.lesson-list{max-height:350px}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:780px){.app{display:block}.sidebar{transform:translateX(-100%);transition:.25s}.sidebar.open{transform:translateX(0)}.main{width:100%}.menu-mobile{display:block}.topbar{padding:0 15px}.content{padding:18px}.grid,.lab,.challenge-grid,.profile{grid-template-columns:1fr}.kpi-grid,.achievement-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.search{display:none}}
+@media(max-width:430px){.stats{grid-template-columns:1fr}.hero{padding:22px}.top-actions .hide-sm{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><div class="logo">A</div><div><b>APRENDTK</b><small>EDUCATIVE ENVIRONMENT</small></div></div>
+  <div class="nav-title">Principal</div>
+  <nav class="nav">
+    <button class="active" data-view="dashboard"><span class="icon">⌂</span>Inicio</button>
+    <button data-view="courses"><span class="icon">▣</span>Mis cursos</button>
+    <button data-view="explore"><span class="icon">◉</span>Explorar</button>
+    <button data-view="labs"><span class="icon">⌘</span>Coding Labs</button>
+    <button data-view="challenges"><span class="icon">⚡</span>Retos técnicos</button>
+  </nav>
+  <div class="nav-title">Mi progreso</div>
+  <nav class="nav">
+    <button data-view="progress"><span class="icon">◒</span>Progreso</button>
+    <button data-view="achievements"><span class="icon">♛</span>Logros</button>
+    <button data-view="profile"><span class="icon">◯</span>Mi perfil</button>
+  </nav>
+  <div class="side-bottom"><div class="user-mini"><div class="avatar" id="sideAvatar">G</div><div><b id="sideName">Estudiante</b><small id="sideLevel">Nivel 1 · 0 XP</small></div></div></div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+  <button class="circle-btn menu-mobile" id="menuBtn">☰</button>
+  <div class="search"><span>⌕</span><input id="globalSearch" placeholder="Buscar cursos, labs, retos..." autocomplete="off"></div>
+  <div class="top-actions">
+    <button class="circle-btn" id="themeBtn" title="Cambiar tema">☾</button>
+    <button class="circle-btn" id="helpBtn" title="Ayuda">?</button>
+    <button class="btn btn-primary hide-sm" id="profileBtn">Mi perfil</button>
+  </div>
+</header>
+
+<section class="content">
+<!-- DASHBOARD -->
+<div class="view active" id="view-dashboard">
+  <div class="hero">
+    <div class="eyebrow">Aprende · Practica · Construye</div>
+    <h1>Aprende tecnología<br>haciendo tecnología.</h1>
+    <p>APRENDTK combina clases grabadas, teoría, laboratorios de programación y retos técnicos para llevarte desde el concepto hasta un proyecto funcional.</p>
+    <div class="hero-actions"><button class="btn btn-primary" onclick="navigate('explore')">Explorar cursos →</button><button class="btn btn-secondary" onclick="navigate('challenges')">Resolver un reto ⚡</button></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><strong id="statCourses">0</strong><span>Cursos en progreso</span></div>
+    <div class="stat"><strong id="statHours">0h</strong><span>Tiempo de aprendizaje</span></div>
+    <div class="stat"><strong id="statXP">0</strong><span>XP acumulada</span></div>
+    <div class="stat"><strong id="statStreak">1</strong><span>Días de racha 🔥</span></div>
+  </div>
+  <div class="section-head"><div><h2>Continúa aprendiendo</h2><p>Retoma donde lo dejaste.</p></div><button class="btn btn-secondary" onclick="navigate('courses')">Ver todos</button></div>
+  <div class="grid" id="continueGrid"></div>
+  <div class="section-head"><div><h2>Ruta recomendada</h2><p>Teoría → práctica → reto.</p></div></div>
+  <div class="grid" id="recommendedGrid"></div>
+</div>
+
+<!-- COURSES -->
+<div class="view" id="view-courses">
+  <div class="section-head"><div><h2>Mis cursos</h2><p>Tu biblioteca personal de aprendizaje.</p></div></div>
+  <div class="filters" id="courseFilters"><button class="filter active" data-filter="all">Todos</button><button class="filter" data-filter="frontend">Frontend</button><button class="filter" data-filter="backend">Backend</button><button class="filter" data-filter="data">Data & IA</button></div>
+  <div class="grid" id="courseGrid"></div>
+</div>
+
+<!-- EXPLORE -->
+<div class="view" id="view-explore">
+  <div class="section-head"><div><h2>Explorar APRENDTK</h2><p>Encuentra tu próximo desafío.</p></div></div>
+  <div class="card" style="margin-bottom:16px"><input id="exploreSearch" class="searchInput" placeholder="Busca por tecnología: Python, JavaScript, SQL, IA..." style="width:100%;background:#091525;border:1px solid var(--line);color:#fff;padding:13px;border-radius:11px"></div>
+  <div class="grid" id="exploreGrid"></div>
+</div>
+
+<!-- COURSE DETAIL -->
+<div class="view" id="view-courseDetail">
+  <button class="btn btn-secondary" onclick="navigate('courses')">← Volver a cursos</button>
+  <div class="section-head"><div><h2 id="detailTitle">Curso</h2><p id="detailDesc"></p></div><span class="badge" id="detailLevel"></span></div>
+  <div class="lesson-layout">
+    <div>
+      <div class="player" id="videoPlayer"></div>
+      <div class="lesson-info">
+        <div class="eyebrow" id="lessonType">TEORÍA</div>
+        <h2 id="lessonTitle">Clase</h2>
+        <p id="lessonDescription"></p>
+        <div class="tabs"><button class="tab active" data-tab="content">Contenido</button><button class="tab" data-tab="notes">Notas</button><button class="tab" data-tab="lab">Práctica</button></div>
+        <div id="tabContent" style="padding-top:16px"></div>
+      </div>
+    </div>
+    <div class="card"><div class="section-head" style="margin:0 0 10px"><div><h2>Contenido</h2><p id="lessonCount"></p></div></div><div class="lesson-list" id="lessonList"></div></div>
+  </div>
+</div>
+
+<!-- LABS -->
+<div class="view" id="view-labs">
+  <div class="section-head"><div><h2>💻 Coding Labs</h2><p>Escribe código, ejecútalo y experimenta.</p></div><button class="btn btn-primary" id="runLabTop">▶ Ejecutar</button></div>
+  <div class="lab">
+    <div class="editor"><div class="editor-head"><b>HTML / CSS / JavaScript</b><span class="badge">Sandbox</span></div><textarea id="codeEditor"><!DOCTYPE html>
+<html>
+<head>
+<style>
+body { font-family: sans-serif; padding: 30px; background: #f4f7fb; }
+.card { padding: 20px; border-radius: 15px; background: white; }
+button { padding: 10px 14px; border:0; border-radius:8px; background:#6c63ff; color:white; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Hola APRENDTK 🚀</h1>
+  <p>Modifica este código y pulsa Ejecutar.</p>
+  <button onclick="saludar()">Probar JavaScript</button>
+</div>
+<script>
+function saludar(){
+  document.querySelector('p').textContent = '¡Tu código funciona!';
+}
+</script>
+</body>
+</html></textarea><div style="padding:10px"><button class="btn btn-primary" id="runLab">▶ Ejecutar código</button><button class="btn btn-secondary" id="resetLab">Restaurar</button></div></div>
+    <div class="editor"><div class="editor-head"><b>Resultado</b><span class="badge">Preview</span></div><iframe id="labPreview" class="preview" sandbox="allow-scripts"></iframe></div>
+  </div>
+  <div class="section-head"><div><h2>Laboratorios disponibles</h2><p>Práctica guiada por tecnología.</p></div></div>
+  <div class="grid" id="labGrid"></div>
+</div>
+
+<!-- CHALLENGES -->
+<div class="view" id="view-challenges">
+  <div class="section-head"><div><h2>⚡ Retos técnicos</h2><p>Demuestra lo que sabes resolviendo problemas.</p></div></div>
+  <div class="challenge-grid">
+    <div class="card challenge">
+      <span class="badge">JavaScript · Intermedio · 150 XP</span>
+      <h3 style="margin-top:14px">Reto: Filtrar usuarios activos</h3>
+      <p>Completa la función <b>getActiveUsers(users)</b> para devolver solamente los usuarios cuyo campo <b>active</b> sea true.</p>
+      <ul><li>Conserva el orden original.</li><li>No modifiques el arreglo recibido.</li><li>Devuelve un nuevo arreglo.</li></ul>
+      <div class="tests"><b>Casos de prueba</b><pre style="color:#a9bad0">Input: [{name:"Ana",active:true},{name:"Luis",active:false}]
+Output: [{name:"Ana",active:true}]</pre></div>
+    </div>
+    <div class="editor"><div class="editor-head"><b>Tu solución</b><span class="badge">JavaScript</span></div><textarea id="challengeEditor">function getActiveUsers(users) {
+  // Escribe tu solución aquí
+}</textarea><div style="padding:10px;display:flex;gap:8px"><button class="btn btn-primary" id="submitChallenge">✓ Evaluar</button><button class="btn btn-secondary" id="hintChallenge">💡 Pista</button></div></div>
+  </div>
+  <div class="section-head"><div><h2>Otros retos</h2></div></div>
+  <div class="grid" id="challengeGrid"></div>
+</div>
+
+<!-- PROGRESS -->
+<div class="view" id="view-progress">
+  <div class="section-head"><div><h2>📈 Mi progreso</h2><p>Tu evolución en APRENDTK.</p></div></div>
+  <div class="kpi-grid">
+    <div class="card"><span class="eyebrow">XP</span><h2 id="progressXP">0</h2><p style="color:var(--muted)">Experiencia acumulada</p></div>
+    <div class="card"><span class="eyebrow">NIVEL</span><h2 id="progressLevel">1</h2><p style="color:var(--muted)">Sigue completando retos.</p></div>
+    <div class="card"><span class="eyebrow">CLASES</span><h2 id="progressLessons">0</h2><p style="color:var(--muted)">Clases completadas.</p></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Actividad semanal</h3><div class="chart" id="activityChart"></div></div>
+  <div class="section-head"><div><h2>Progreso por curso</h2></div></div><div id="progressCourses"></div>
+</div>
+
+<!-- ACHIEVEMENTS -->
+<div class="view" id="view-achievements">
+  <div class="section-head"><div><h2>🏆 Logros</h2><p>Convierte tu progreso en hitos.</p></div></div>
+  <div class="achievement-grid" id="achievementGrid"></div>
+</div>
+
+<!-- PROFILE -->
+<div class="view" id="view-profile">
+  <div class="section-head"><div><h2>Mi perfil</h2><p>Personaliza tu experiencia.</p></div></div>
+  <div class="profile">
+    <div class="card profile-card"><div class="big-avatar" id="bigAvatar">G</div><h2 id="profileName">Estudiante</h2><p id="profileEmail" style="color:var(--muted)">estudiante@aprendtk.local</p><span class="badge" id="profileLevel">Nivel 1</span></div>
+    <div class="card">
+      <h3>Datos del perfil</h3>
+      <div class="form-row"><label>Nombre</label><input id="nameInput" value="Estudiante"></div>
+      <div class="form-row"><label>Correo</label><input id="emailInput" value="estudiante@aprendtk.local"></div>
+      <div class="form-row"><label>Objetivo</label><select id="goalInput"><option>Convertirme en desarrollador Full Stack</option><option>Aprender Data & IA</option><option>Prepararme para entrevistas técnicas</option><option>Construir mis propios proyectos</option></select></div>
+      <button class="btn btn-primary" id="saveProfile">Guardar perfil</button>
+      <button class="btn btn-danger" id="resetData" style="margin-left:7px">Restablecer demo</button>
+    </div>
+  </div>
+</div>
+</section>
+</main>
+</div>
+
+<div class="modal" id="helpModal"><div class="modal-box"><h2>¿Cómo funciona APRENDTK?</h2><p style="color:var(--muted);line-height:1.7">Selecciona un curso, mira las clases grabadas, practica en Coding Labs y después resuelve retos técnicos para ganar XP. El progreso se guarda automáticamente en tu navegador.</p><button class="btn btn-primary" onclick="closeModal()">Entendido</button></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const courses=[
+{id:'js',title:'JavaScript Moderno',cat:'frontend',level:'Intermedio',desc:'Fundamentos modernos, DOM, asincronía y buenas prácticas.',cover:'cover-js',duration:'8h 20m',lessons:[
+['Introducción a JavaScript','TEORÍA','12 min','Conceptos esenciales y entorno.','PkZNo7MFNFg'],
+['Variables, tipos y operadores','TEORÍA','18 min','Cómo modelar datos y expresiones.','W6NZfCO5SIk'],
+['DOM y eventos','PRÁCTICA','27 min','Manipulación de interfaces con JavaScript.','5fb2aPls5XY'],
+['Async / Await y APIs','PRÁCTICA','34 min','Consumo de APIs y código asíncrono.','V_Kr9OSfDeU'],
+['Reto: lista interactiva','RETO','25 min','Construye una lista con filtros y eventos.','hdI2bqOjy3c']]},
+{id:'python',title:'Python para Desarrollo',cat:'backend',level:'Inicial',desc:'Aprende Python construyendo pequeños programas y APIs.',cover:'cover-python',duration:'7h 10m',lessons:[
+['Python desde cero','TEORÍA','15 min','Sintaxis, variables y estructuras.','rfscVS0vtbw'],
+['Funciones y módulos','TEORÍA','24 min','Organiza código reutilizable.','9Os0o3wzS_I'],
+['POO con Python','PRÁCTICA','31 min','Clases, objetos y encapsulamiento.','JeznW_7DlB0'],
+['API REST con FastAPI','PRÁCTICA','39 min','Crea tu primera API.','0sOvCWFmrtA'],
+['Reto: procesador de datos','RETO','30 min','Resuelve un problema con Python.','HGOBQPFzWKo']]},
+{id:'data',title:'Data & IA Aplicada',cat:'data',level:'Avanzado',desc:'SQL, análisis de datos y fundamentos de inteligencia artificial.',cover:'cover-data',duration:'10h 45m',lessons:[
+['Introducción a Data Engineering','TEORÍA','19 min','Datos, pipelines y arquitecturas.','ua-CiDNNj30'],
+['SQL para análisis','PRÁCTICA','29 min','Consultas, joins y agregaciones.','HXV3zeQKqGY'],
+['ETL con Python','PRÁCTICA','36 min','Extrae, transforma y carga datos.','Yk1JXhN0Zx8'],
+['Machine Learning básico','TEORÍA','42 min','Modelos, features y evaluación.','Gv9_4yMHFhI'],
+['Reto: predictor de ventas','RETO','45 min','Diseña una solución predictiva.','KNAWp2S3w94']]},
+{id:'sql',title:'SQL Profesional',cat:'data',level:'Intermedio',desc:'Bases de datos relacionales, consultas y optimización.',cover:'',duration:'6h 40m',lessons:[
+['Modelo relacional','TEORÍA','20 min','Tablas, claves y relaciones.','ztHopE5Wnpc'],
+['SELECT y filtros','PRÁCTICA','25 min','Consulta datos de manera eficiente.','7S_tz1z_5bA'],
+['JOINs y subconsultas','PRÁCTICA','32 min','Combina información de múltiples tablas.','9yeOJ0ZMUYw'],
+['Índices y rendimiento','TEORÍA','28 min','Optimización de consultas.','HubezKbFL7E']]},
+{id:'react',title:'React desde Cero',cat:'frontend',level:'Intermedio',desc:'Componentes, estado, eventos y construcción de interfaces.',cover:'',duration:'8h 55m',lessons:[
+['Qué es React','TEORÍA','16 min','Componentes y renderizado.','Tn6-PIqc4UM'],
+['Props y componentes','PRÁCTICA','26 min','Construye UI reutilizable.','Rh3tobg7hEo'],
+['Estado y eventos','PRÁCTICA','33 min','Interactividad en React.','O6P86uwfdR0'],
+['Proyecto: Dashboard','RETO','50 min','Construye un dashboard responsive.','Ke90Tje7VS0']]}
+];
+
+const labs=[
+['Lab 01 · HTML semántico','HTML','Inicial','Construye una landing accesible.'],
+['Lab 02 · JavaScript DOM','JavaScript','Intermedio','Manipula elementos y eventos.'],
+['Lab 03 · API REST','Python / FastAPI','Intermedio','Crea endpoints para un recurso.'],
+['Lab 04 · SQL Analytics','SQL','Intermedio','Obtén KPIs mediante consultas.'],
+['Lab 05 · React Components','React','Intermedio','Construye componentes reutilizables.'],
+['Lab 06 · ML Pipeline','Python / ML','Avanzado','Entrena y evalúa un modelo.']
+];
+const challenges=[
+['API Validator','Backend','Intermedio','Valida un objeto recibido por una API.','180 XP'],
+['SQL Ranking','SQL','Intermedio','Obtén el top 5 de clientes por ventas.','200 XP'],
+['React Search','Frontend','Intermedio','Crea un buscador con filtrado instantáneo.','180 XP'],
+['ETL Challenge','Data','Avanzado','Diseña un pipeline ETL reproducible.','300 XP'],
+['Dockerize App','DevOps','Avanzado','Conteneriza una aplicación web.','250 XP'],
+['System Design','Arquitectura','Avanzado','Diseña una plataforma EdTech escalable.','400 XP']
+];
+
+const defaultState={name:'Estudiante',email:'estudiante@aprendtk.local',goal:'Convertirme en desarrollador Full Stack',xp:0,completed:{},courseProgress:{},activity:[1,2,1,3,2,0,1],dark:true};
+let state=JSON.parse(localStorage.getItem('aprendtk_state')||'null')||structuredClone(defaultState);
+let currentCourse=null,currentLesson=0;
+
+function save(){localStorage.setItem('aprendtk_state',JSON.stringify(state));renderAll()}
+function initials(){return (state.name||'Estudiante').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()}
+function level(){return Math.floor(state.xp/500)+1}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),2500)}
+function navigate(view){
+ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+ const target=document.getElementById('view-'+view);if(target)target.classList.add('active');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+ document.getElementById('sidebar').classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});
+ if(view==='dashboard')renderDashboard(); if(view==='courses')renderCourses();if(view==='explore')renderExplore();
+ if(view==='labs')renderLabs();if(view==='challenges')renderChallenges();if(view==='progress')renderProgress();if(view==='achievements')renderAchievements();if(view==='profile')renderProfile();
+}
+function courseCard(c,buttonText='Abrir curso'){
+ const p=state.courseProgress[c.id]||0;
+ return `<article class="course"><div class="course-cover ${c.cover||''}"><span class="badge">${c.level}</span><strong>${c.title}</strong></div><div class="course-body"><div class="meta"><span>◷ ${c.duration}</span><span>▣ ${c.lessons.length} clases</span></div><p>${c.desc}</p><div class="progress"><i style="width:${p}%"></i></div><div style="display:flex;justify-content:space-between;align-items:center"><small style="color:#8295ad">${p}% completado</small><button class="btn btn-primary" onclick="openCourse('${c.id}')">${buttonText}</button></div></div></article>`
+}
+function renderDashboard(){
+ const inProgress=courses.filter(c=>(state.courseProgress[c.id]||0)>0);
+ document.getElementById('continueGrid').innerHTML=(inProgress.length?inProgress:courses.slice(0,3)).map(c=>courseCard(c,'Continuar')).join('');
+ document.getElementById('recommendedGrid').innerHTML=courses.slice(0,3).map(c=>courseCard(c)).join('');
+ document.getElementById('statCourses').textContent=inProgress.length;
+ document.getElementById('statXP').textContent=state.xp;
+ document.getElementById('statHours').textContent=Math.max(0,Math.round(Object.values(state.courseProgress).reduce((a,b)=>a+b,0)/12))+'h';
+ document.getElementById('statStreak').textContent=Math.max(1,state.activity.filter(x=>x>0).length);
+}
+function renderCourses(filter='all'){
+ document.getElementById('courseGrid').innerHTML=courses.filter(c=>filter==='all'||c.cat===filter).map(c=>courseCard(c)).join('');
+}
+function renderExplore(query=''){
+ const q=query.toLowerCase();
+ document.getElementById('exploreGrid').innerHTML=courses.filter(c=>(c.title+' '+c.desc+' '+c.cat).toLowerCase().includes(q)).map(c=>courseCard(c)).join('')||'<div class="empty">No encontramos cursos con esa búsqueda.</div>';
+}
+function escapeHtml(value){
+ return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+}
+function openCourse(id){
+ currentCourse=courses.find(c=>c.id===id);currentLesson=0;
+ navigate('courseDetail');renderCourseDetail();
+}
+function renderCourseDetail(){
+ const c=currentCourse,l=c.lessons[currentLesson];
+ document.getElementById('detailTitle').textContent=c.title;document.getElementById('detailDesc').textContent=c.desc;document.getElementById('detailLevel').textContent=c.level;
+ document.getElementById('lessonTitle').textContent=l[0];document.getElementById('lessonType').textContent=l[1];document.getElementById('lessonDescription').textContent=l[3];document.getElementById('lessonCount').textContent=`${c.lessons.length} clases · ${state.courseProgress[c.id]||0}%`;
+ const videoId = l[4] || '';
+ const ytUrl = videoId ? `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1` : '';
+ document.getElementById('videoPlayer').innerHTML = videoId
+   ? `<iframe class="youtube-player" src="${ytUrl}" title="${escapeHtml(l[0])}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      <div class="video-actions"><button class="btn btn-primary" onclick="completeLesson()">✓ Marcar clase completada</button><a class="btn btn-secondary" href="https://www.youtube.com/watch?v=${videoId}" target="_blank" rel="noopener">↗ Ver en YouTube</a></div>`
+   : `<div class="player-placeholder"><div><button class="play-big" onclick="completeLesson()">▶</button><h3>Clase grabada: ${escapeHtml(l[0])}</h3><p style="color:#8ea2ba">${escapeHtml(l[2])} · ${escapeHtml(l[1])}</p></div></div>`;
+ document.getElementById('lessonList').innerHTML=c.lessons.map((x,i)=>`<div class="lesson-item ${i===currentLesson?'active':''}" onclick="selectLesson(${i})"><div class="lesson-num">${state.completed[c.id+'-'+i]?'✓':i+1}</div><div><b>${x[0]}</b><small>${x[1]} · ${x[2]}</small></div></div>`).join('');
+ document.getElementById('tabContent').innerHTML=`<p style="color:#9db0c5;line-height:1.7">${escapeHtml(l[3])} Esta clase forma parte de la ruta práctica de APRENDTK. Después de verla, pasa al laboratorio o reto asociado para consolidar el aprendizaje.</p>
+ <div style="display:flex;gap:8px;flex-wrap:wrap">
+ <button class="btn btn-secondary" onclick="previousLesson()" ${currentLesson===0?'disabled':''}>← Anterior</button>
+ <button class="btn btn-primary" onclick="completeLesson()">Marcar como completada +50 XP</button>
+ <button class="btn btn-secondary" onclick="nextLesson()" ${currentLesson===currentCourse.lessons.length-1?'disabled':''}>Siguiente →</button>
+ </div>`;
+}
+function selectLesson(i){currentLesson=i;renderCourseDetail()}
+function nextLesson(){if(currentLesson<currentCourse.lessons.length-1){currentLesson++;renderCourseDetail();}}
+function previousLesson(){if(currentLesson>0){currentLesson--;renderCourseDetail();}}
+function completeLesson(){
+ if(!currentCourse)return;
+ const key=currentCourse.id+'-'+currentLesson;
+ if(!state.completed[key]){state.completed[key]=true;state.xp+=50;const done=currentCourse.lessons.filter((_,i)=>state.completed[currentCourse.id+'-'+i]).length;state.courseProgress[currentCourse.id]=Math.round(done/currentCourse.lessons.length*100);toast('Clase completada · +50 XP 🎉');save()}else toast('Esta clase ya está completada.');
+}
+function renderLabs(){
+ document.getElementById('labGrid').innerHTML=labs.map(x=>`<article class="card"><span class="badge">${x[1]} · ${x[2]}</span><h3>${x[0]}</h3><p style="color:#93a6bc;line-height:1.5">${x[3]}</p><button class="btn btn-secondary" onclick="loadLab('${x[1]}')">Abrir laboratorio →</button></article>`).join('');
+}
+function loadLab(type){document.getElementById('codeEditor').focus();toast('Laboratorio '+type+' listo para practicar.');}
+function runLab(){const code=document.getElementById('codeEditor').value;document.getElementById('labPreview').srcdoc=code;state.xp+=10;state.activity[6]=Math.min(10,(state.activity[6]||0)+1);save();toast('Código ejecutado · +10 XP');}
+function renderChallenges(){
+ document.getElementById('challengeGrid').innerHTML=challenges.map((x,i)=>`<article class="card"><span class="badge">${x[1]} · ${x[2]}</span><h3>${x[0]}</h3><p style="color:#93a6bc">${x[3]}</p><div style="display:flex;justify-content:space-between;align-items:center"><small style="color:var(--yellow)">⚡ ${x[4]}</small><button class="btn btn-secondary" onclick="toast('Reto seleccionado. Completa la solución principal para evaluarlo.')">Resolver</button></div></article>`).join('');
+}
+function renderProgress(){
+ document.getElementById('progressXP').textContent=state.xp;document.getElementById('progressLevel').textContent=level();
+ document.getElementById('progressLessons').textContent=Object.keys(state.completed).length;
+ document.getElementById('activityChart').innerHTML=state.activity.map((v,i)=>`<div class="bar" style="height:${Math.max(10,v*25)}%"><span>${v}</span><label>${['L','M','X','J','V','S','D'][i]}</label></div>`).join('');
+ document.getElementById('progressCourses').innerHTML=courses.map(c=>`<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between"><b>${c.title}</b><span style="color:#91a2b8">${state.courseProgress[c.id]||0}%</span></div><div class="progress"><i style="width:${state.courseProgress[c.id]||0}%"></i></div></div>`).join('');
+}
+function renderAchievements(){
+ const all=[['🚀','Primer paso','Completa tu primera clase.',Object.keys(state.completed).length>=1],['🔥','En racha','Estudia durante 3 días.',state.activity.filter(x=>x>0).length>=3],['💻','Coder','Ejecuta 5 prácticas en el lab.',state.xp>=50],['⚡','Retador','Alcanza 500 XP.',state.xp>=500],['🏆','Nivel 2','Llega al nivel 2.',level()>=2],['🧠','Aprendiz constante','Alcanza 1000 XP.',state.xp>=1000]];
+ document.getElementById('achievementGrid').innerHTML=all.map(a=>`<div class="achievement" style="opacity:${a[3]?1:.45}"><div class="medal">${a[0]}</div><h3>${a[1]}</h3><p>${a[2]}</p><small>${a[3]?'✓ Desbloqueado':'🔒 Bloqueado'}</small></div>`).join('');
+}
+function renderProfile(){
+ const ini=initials();document.getElementById('sideAvatar').textContent=ini;document.getElementById('bigAvatar').textContent=ini;
+ document.getElementById('sideName').textContent=state.name;document.getElementById('sideLevel').textContent=`Nivel ${level()} · ${state.xp} XP`;
+ document.getElementById('profileName').textContent=state.name;document.getElementById('profileEmail').textContent=state.email;document.getElementById('profileLevel').textContent=`Nivel ${level()} · ${state.xp} XP`;
+ document.getElementById('nameInput').value=state.name;document.getElementById('emailInput').value=state.email;document.getElementById('goalInput').value=state.goal;
+}
+function renderAll(){renderDashboard();renderProfile()}
+function closeModal(){document.getElementById('helpModal').classList.remove('open')}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.view)));
+document.getElementById('menuBtn').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
+document.getElementById('profileBtn').onclick=()=>navigate('profile');
+document.getElementById('helpBtn').onclick=()=>document.getElementById('helpModal').classList.add('open');
+document.getElementById('themeBtn').onclick=()=>{state.dark=!state.dark;document.body.style.filter=state.dark?'none':'brightness(1.08)';save();toast('Preferencia guardada')};
+document.querySelectorAll('#courseFilters .filter').forEach(b=>b.onclick=()=>{document.querySelectorAll('#courseFilters .filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderCourses(b.dataset.filter)});
+document.getElementById('globalSearch').addEventListener('input',e=>{if(e.target.value.trim()){navigate('explore');document.getElementById('exploreSearch').value=e.target.value;renderExplore(e.target.value)}});
+document.getElementById('exploreSearch').addEventListener('input',e=>renderExplore(e.target.value));
+document.getElementById('runLab').onclick=runLab;document.getElementById('runLabTop').onclick=runLab;
+document.getElementById('resetLab').onclick=()=>{document.getElementById('codeEditor').value=document.getElementById('codeEditor').defaultValue;runLab()};
+document.getElementById('submitChallenge').onclick=()=>{
+ const code=document.getElementById('challengeEditor').value;
+ if(/return\s+users\.filter\s*\(\s*u\s*=>\s*u\.active\s*\)/.test(code.replace(/\s+/g,' '))||/filter\s*\([^)]*active/.test(code)){
+  state.xp+=150;toast('¡Reto superado! +150 XP 🏆');save();
+ }else toast('Aún no supera las pruebas. Revisa la pista.');
+};
+document.getElementById('hintChallenge').onclick=()=>toast('Pista: utiliza Array.prototype.filter() y devuelve los elementos con active === true.');
+document.getElementById('saveProfile').onclick=()=>{state.name=document.getElementById('nameInput').value.trim()||'Estudiante';state.email=document.getElementById('emailInput').value.trim();state.goal=document.getElementById('goalInput').value;save();toast('Perfil actualizado ✓')};
+document.getElementById('resetData').onclick=()=>{if(confirm('¿Restablecer todo el progreso demo?')){state=structuredClone(defaultState);save();toast('Demo restablecida')}};
+document.getElementById('helpModal').addEventListener('click',e=>{if(e.target.id==='helpModal')closeModal()});
+renderAll();renderCourses();renderExplore();renderLabs();renderChallenges();runLab();
+</script>
+</body>
+</html>
