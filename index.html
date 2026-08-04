@@ -69,6 +69,20 @@ h1{font-size:clamp(30px,4vw,52px);line-height:1.02;margin:12px 0}.hero p{max-wid
 @media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.lesson-layout{grid-template-columns:1fr}.lesson-list{max-height:350px}.stats{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:780px){.app{display:block}.sidebar{transform:translateX(-100%);transition:.25s}.sidebar.open{transform:translateX(0)}.main{width:100%}.menu-mobile{display:block}.topbar{padding:0 15px}.content{padding:18px}.grid,.lab,.challenge-grid,.profile{grid-template-columns:1fr}.kpi-grid,.achievement-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.search{display:none}}
 @media(max-width:430px){.stats{grid-template-columns:1fr}.hero{padding:22px}.top-actions .hide-sm{display:none}}
+
+.route-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;transition:.2s}
+.route-card:hover{transform:translateY(-4px);border-color:#4c68a0}
+.route-cover{min-height:155px;padding:20px;background:linear-gradient(135deg,#182c4d,#24204c);display:flex;flex-direction:column;justify-content:space-between}
+.route-cover strong{font-size:21px;max-width:88%}
+.route-body{padding:18px}.route-body p{color:var(--muted);line-height:1.6;font-size:13px}
+.route-meta{display:flex;gap:10px;flex-wrap:wrap;color:#8fa3bb;font-size:11px;margin:10px 0}
+.route-tags{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.route-tags span{padding:5px 8px;border-radius:15px;background:#14243a;border:1px solid var(--line);font-size:10px;color:#b7c7da}
+.route-courses{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.route-courses small{display:block;color:#91a2b8;margin-bottom:8px}
+.route-course-row{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;font-size:12px}
+.route-course-row span{color:#a8b8cb}
+
 </style>
 </head>
 <body>
@@ -80,6 +94,7 @@ h1{font-size:clamp(30px,4vw,52px);line-height:1.02;margin:12px 0}.hero p{max-wid
     <button class="active" data-view="dashboard"><span class="icon">⌂</span>Inicio</button>
     <button data-view="courses"><span class="icon">▣</span>Mis cursos</button>
     <button data-view="explore"><span class="icon">◉</span>Explorar</button>
+    <button data-view="routes"><span class="icon">🧭</span>Rutas de aprendizaje</button>
     <button data-view="labs"><span class="icon">⌘</span>Coding Labs</button>
     <button data-view="challenges"><span class="icon">⚡</span>Retos técnicos</button>
   </nav>
@@ -122,12 +137,23 @@ h1{font-size:clamp(30px,4vw,52px);line-height:1.02;margin:12px 0}.hero p{max-wid
   <div class="grid" id="continueGrid"></div>
   <div class="section-head"><div><h2>Ruta recomendada</h2><p>Teoría → práctica → reto.</p></div></div>
   <div class="grid" id="recommendedGrid"></div>
+
+  <div class="section-head"><div><h2>🧭 Rutas de aprendizaje</h2><p>Programas completos para avanzar por objetivos.</p></div><button class="btn btn-secondary" onclick="navigate('routes')">Ver todas</button></div>
+  <div class="grid" id="dashboardRoutes"></div>
+
 </div>
 
 <!-- COURSES -->
 <div class="view" id="view-courses">
   <div class="section-head"><div><h2>Mis cursos</h2><p>Tu biblioteca personal de aprendizaje.</p></div></div>
-  <div class="filters" id="courseFilters"><button class="filter active" data-filter="all">Todos</button><button class="filter" data-filter="frontend">Frontend</button><button class="filter" data-filter="backend">Backend</button><button class="filter" data-filter="data">Data & IA</button></div>
+  <div class="filters" id="courseFilters">
+<button class="filter active" data-filter="all">Todos</button>
+<button class="filter" data-filter="frontend">Frontend</button>
+<button class="filter" data-filter="backend">Backend</button>
+<button class="filter" data-filter="data">Data & IA</button>
+<button class="filter" data-filter="devops">DevOps</button>
+<button class="filter" data-filter="cloud">Cloud</button>
+</div>
   <div class="grid" id="courseGrid"></div>
 </div>
 
@@ -136,6 +162,17 @@ h1{font-size:clamp(30px,4vw,52px);line-height:1.02;margin:12px 0}.hero p{max-wid
   <div class="section-head"><div><h2>Explorar APRENDTK</h2><p>Encuentra tu próximo desafío.</p></div></div>
   <div class="card" style="margin-bottom:16px"><input id="exploreSearch" class="searchInput" placeholder="Busca por tecnología: Python, JavaScript, SQL, IA..." style="width:100%;background:#091525;border:1px solid var(--line);color:#fff;padding:13px;border-radius:11px"></div>
   <div class="grid" id="exploreGrid"></div>
+</div>
+
+
+<!-- LEARNING ROUTES -->
+<div class="view" id="view-routes">
+  <div class="hero" style="margin-bottom:18px">
+    <div class="eyebrow">Learning Paths · APRENDTK</div>
+    <h1>Rutas de aprendizaje</h1>
+    <p>Elige una ruta y avanza desde fundamentos hasta proyectos, laboratorios y retos técnicos.</p>
+  </div>
+  <div class="grid" id="routeGrid"></div>
 </div>
 
 <!-- COURSE DETAIL -->
@@ -251,43 +288,166 @@ Output: [{name:"Ana",active:true}]</pre></div>
 
 <script>
 const courses=[
+{id:'html',title:'HTML5 Profesional',cat:'frontend',level:'Inicial',desc:'Semántica, formularios, accesibilidad y estructura profesional.',cover:'',duration:'5h 20m',lessons:[
+['Fundamentos de HTML5','TEORÍA','18 min','Estructura de documentos, etiquetas y buenas prácticas.','UB1O30fR-EE'],
+['HTML semántico','TEORÍA','24 min','Construye páginas con una estructura semántica clara.','kUMe1FH4CHE'],
+['Formularios y validación','PRÁCTICA','31 min','Crea formularios accesibles y correctamente validados.','fNcJuPjX3M0'],
+['Accesibilidad web','PRÁCTICA','27 min','Mejora navegación, etiquetas y experiencia inclusiva.','20SHvU2PKsM'],
+['Proyecto: landing profesional','RETO','40 min','Construye una landing completa y responsive.','qz0aGYrrlhU']]},
+{id:'css',title:'CSS Moderno y Responsive',cat:'frontend',level:'Inicial',desc:'Flexbox, Grid, responsive design, animaciones y arquitectura CSS.',cover:'cover-js',duration:'7h 05m',lessons:[
+['CSS desde cero','TEORÍA','20 min','Selectores, cascada, herencia y box model.','1Rs2ND1ryYc'],
+['Flexbox','PRÁCTICA','29 min','Construye layouts flexibles y adaptables.','phWxA89Dy94'],
+['CSS Grid','PRÁCTICA','32 min','Diseña interfaces complejas con Grid.','EFafSYg-PkI'],
+['Responsive Design','PRÁCTICA','35 min','Adapta interfaces a móviles, tablets y desktop.','srvUrASNj0s'],
+['Proyecto: dashboard responsive','RETO','45 min','Construye un dashboard moderno desde cero.','G3e-cpL7ofc']]},
 {id:'js',title:'JavaScript Moderno',cat:'frontend',level:'Intermedio',desc:'Fundamentos modernos, DOM, asincronía y buenas prácticas.',cover:'cover-js',duration:'8h 20m',lessons:[
 ['Introducción a JavaScript','TEORÍA','12 min','Conceptos esenciales y entorno.','PkZNo7MFNFg'],
 ['Variables, tipos y operadores','TEORÍA','18 min','Cómo modelar datos y expresiones.','W6NZfCO5SIk'],
 ['DOM y eventos','PRÁCTICA','27 min','Manipulación de interfaces con JavaScript.','5fb2aPls5XY'],
 ['Async / Await y APIs','PRÁCTICA','34 min','Consumo de APIs y código asíncrono.','V_Kr9OSfDeU'],
 ['Reto: lista interactiva','RETO','25 min','Construye una lista con filtros y eventos.','hdI2bqOjy3c']]},
+{id:'typescript',title:'TypeScript Profesional',cat:'frontend',level:'Intermedio',desc:'Tipado estático, interfaces, genéricos y patrones para aplicaciones modernas.',cover:'cover-js',duration:'6h 50m',lessons:[
+['TypeScript desde cero','TEORÍA','21 min','Tipos básicos y configuración.','30LWjhZzg50'],
+['Interfaces y tipos','PRÁCTICA','28 min','Modela estructuras de datos con precisión.','ahCwqrYpI1A'],
+['Generics','PRÁCTICA','31 min','Construye funciones y componentes reutilizables.','k5s2GQv8mYw'],
+['TypeScript con APIs','PRÁCTICA','34 min','Integra datos externos con tipado.','BCg4U1FzODs'],
+['Reto: refactor tipado','RETO','35 min','Convierte JavaScript existente a TypeScript.','zQnQeG1mYVQ']]},
+{id:'react',title:'React desde Cero',cat:'frontend',level:'Intermedio',desc:'Componentes, estado, eventos y construcción de interfaces.',cover:'',duration:'8h 55m',lessons:[
+['Qué es React','TEORÍA','16 min','Componentes y renderizado.','Tn6-PIqc4UM'],
+['Props y componentes','PRÁCTICA','26 min','Construye UI reutilizable.','Rh3tobg7hEoE'],
+['Estado y eventos','PRÁCTICA','33 min','Interactividad en React.','O6P86uwfdR0'],
+['Hooks esenciales','PRÁCTICA','36 min','Gestiona estado y efectos con hooks.','TNhaISOUy6Q'],
+['Proyecto: Dashboard','RETO','50 min','Construye un dashboard responsive.','Ke90Tje7VS0']]},
+{id:'node',title:'Node.js y Express',cat:'backend',level:'Intermedio',desc:'Backend JavaScript, APIs REST, middleware, autenticación y persistencia.',cover:'cover-python',duration:'8h 15m',lessons:[
+['Node.js desde cero','TEORÍA','22 min','Runtime, módulos y npm.','Oe421EPjeBE'],
+['Express y rutas','PRÁCTICA','30 min','Construye endpoints y middleware.','SccSCuHhOw0'],
+['APIs REST','PRÁCTICA','35 min','Diseña APIs mantenibles y consistentes.','-MTSQjw5DrM'],
+['JWT y autenticación','PRÁCTICA','39 min','Protege recursos con tokens.','mbsmsi7lZC8'],
+['Proyecto: API de tareas','RETO','50 min','Construye una API REST completa.','pKd0Rpw7O48']]},
 {id:'python',title:'Python para Desarrollo',cat:'backend',level:'Inicial',desc:'Aprende Python construyendo pequeños programas y APIs.',cover:'cover-python',duration:'7h 10m',lessons:[
 ['Python desde cero','TEORÍA','15 min','Sintaxis, variables y estructuras.','rfscVS0vtbw'],
 ['Funciones y módulos','TEORÍA','24 min','Organiza código reutilizable.','9Os0o3wzS_I'],
 ['POO con Python','PRÁCTICA','31 min','Clases, objetos y encapsulamiento.','JeznW_7DlB0'],
 ['API REST con FastAPI','PRÁCTICA','39 min','Crea tu primera API.','0sOvCWFmrtA'],
 ['Reto: procesador de datos','RETO','30 min','Resuelve un problema con Python.','HGOBQPFzWKo']]},
+{id:'fastapi',title:'FastAPI para Microservicios',cat:'backend',level:'Intermedio',desc:'APIs modernas con Python, Pydantic, documentación y arquitectura limpia.',cover:'cover-python',duration:'6h 40m',lessons:[
+['FastAPI y entorno','TEORÍA','20 min','Estructura y ejecución de una API.','0sOvCWFmrtA'],
+['Pydantic y validación','PRÁCTICA','28 min','Valida entradas y respuestas.','wVYwunX7b1s'],
+['CRUD con PostgreSQL','PRÁCTICA','38 min','Persistencia y operaciones CRUD.','7t2alSnE2-I'],
+['JWT y seguridad','PRÁCTICA','35 min','Autenticación y autorización.','0A_JpLYi9Jg'],
+['Microservicio productivo','RETO','45 min','Construye un servicio listo para desplegar.','7FJQ0YpT6mY']]},
+{id:'java',title:'Java y Spring Boot',cat:'backend',level:'Intermedio',desc:'Programación empresarial, APIs REST, JPA y microservicios.',cover:'cover-python',duration:'9h 30m',lessons:[
+['Java moderno','TEORÍA','28 min','POO, colecciones y excepciones.','eIrMbAQSU34'],
+['Spring Boot','TEORÍA','30 min','Crea una aplicación backend empresarial.','9SGDpanrc8U'],
+['REST Controllers','PRÁCTICA','34 min','Construye APIs REST.','N8n5J4f9J0U'],
+['JPA y PostgreSQL','PRÁCTICA','42 min','Persistencia con ORM.','2Vf0y6s4p1Y'],
+['Proyecto: microservicio','RETO','55 min','Implementa un servicio empresarial.','mJ9pV9fV2eI']]},
+{id:'sql',title:'SQL Profesional',cat:'data',level:'Intermedio',desc:'Bases de datos relacionales, consultas y optimización.',cover:'',duration:'6h 40m',lessons:[
+['Modelo relacional','TEORÍA','20 min','Tablas, claves y relaciones.','ztHopE5Wnpc'],
+['SELECT y filtros','PRÁCTICA','25 min','Consulta datos de manera eficiente.','7S_tz1z_5bA'],
+['JOINs y subconsultas','PRÁCTICA','32 min','Combina información de múltiples tablas.','9yeOJ0ZMUYw'],
+['Índices y rendimiento','TEORÍA','28 min','Optimización de consultas.','HubezKbFL7E'],
+['Reto: analytics SQL','RETO','40 min','Resuelve KPIs de negocio con SQL.','qw--VYLpxG4']]},
+{id:'postgres',title:'PostgreSQL Avanzado',cat:'data',level:'Intermedio',desc:'Diseño, índices, transacciones, funciones y rendimiento en PostgreSQL.',cover:'cover-data',duration:'7h 20m',lessons:[
+['PostgreSQL esencial','TEORÍA','22 min','Tipos, esquemas y herramientas.','qw--VYLpxG4'],
+['Índices y EXPLAIN','PRÁCTICA','35 min','Analiza y mejora consultas.','1Q5P4QJ5K8c'],
+['Transacciones','PRÁCTICA','30 min','Garantiza consistencia y aislamiento.','9Yf5Q0z0YvM'],
+['Funciones y triggers','PRÁCTICA','36 min','Automatiza lógica en la base.','4W7pQx8z3nE'],
+['Reto: optimización','RETO','45 min','Optimiza una base de datos realista.','K8n4L0qz2mA']]},
 {id:'data',title:'Data & IA Aplicada',cat:'data',level:'Avanzado',desc:'SQL, análisis de datos y fundamentos de inteligencia artificial.',cover:'cover-data',duration:'10h 45m',lessons:[
 ['Introducción a Data Engineering','TEORÍA','19 min','Datos, pipelines y arquitecturas.','ua-CiDNNj30'],
 ['SQL para análisis','PRÁCTICA','29 min','Consultas, joins y agregaciones.','HXV3zeQKqGY'],
 ['ETL con Python','PRÁCTICA','36 min','Extrae, transforma y carga datos.','Yk1JXhN0Zx8'],
 ['Machine Learning básico','TEORÍA','42 min','Modelos, features y evaluación.','Gv9_4yMHFhI'],
 ['Reto: predictor de ventas','RETO','45 min','Diseña una solución predictiva.','KNAWp2S3w94']]},
-{id:'sql',title:'SQL Profesional',cat:'data',level:'Intermedio',desc:'Bases de datos relacionales, consultas y optimización.',cover:'',duration:'6h 40m',lessons:[
-['Modelo relacional','TEORÍA','20 min','Tablas, claves y relaciones.','ztHopE5Wnpc'],
-['SELECT y filtros','PRÁCTICA','25 min','Consulta datos de manera eficiente.','7S_tz1z_5bA'],
-['JOINs y subconsultas','PRÁCTICA','32 min','Combina información de múltiples tablas.','9yeOJ0ZMUYw'],
-['Índices y rendimiento','TEORÍA','28 min','Optimización de consultas.','HubezKbFL7E']]},
-{id:'react',title:'React desde Cero',cat:'frontend',level:'Intermedio',desc:'Componentes, estado, eventos y construcción de interfaces.',cover:'',duration:'8h 55m',lessons:[
-['Qué es React','TEORÍA','16 min','Componentes y renderizado.','Tn6-PIqc4UM'],
-['Props y componentes','PRÁCTICA','26 min','Construye UI reutilizable.','Rh3tobg7hEo'],
-['Estado y eventos','PRÁCTICA','33 min','Interactividad en React.','O6P86uwfdR0'],
-['Proyecto: Dashboard','RETO','50 min','Construye un dashboard responsive.','Ke90Tje7VS0']]}
+{id:'pandas',title:'Pandas para Data Analysis',cat:'data',level:'Intermedio',desc:'Limpieza, transformación, agregación y análisis exploratorio con Python.',cover:'cover-data',duration:'6h 30m',lessons:[
+['DataFrames y Series','TEORÍA','20 min','Trabaja con estructuras tabulares.','vmEHCJofslg'],
+['Limpieza de datos','PRÁCTICA','32 min','Valores nulos, duplicados y tipos.','tR9qKc0dG5A'],
+['Transformaciones','PRÁCTICA','35 min','Agrupa, une y transforma datasets.','vmEHCJofslg'],
+['EDA','PRÁCTICA','38 min','Encuentra patrones y anomalías.','5qap5aO4i9A'],
+['Reto: dataset empresarial','RETO','45 min','Analiza un dataset de negocio.','4b5d3W0QmGk']]},
+{id:'ml',title:'Machine Learning con Python',cat:'data',level:'Avanzado',desc:'Regresión, clasificación, evaluación, features y pipelines con Scikit-Learn.',cover:'cover-data',duration:'9h 10m',lessons:[
+['ML y ciclo de vida','TEORÍA','25 min','De los datos al modelo.','i_LwzR7qWmM'],
+['Regresión','PRÁCTICA','35 min','Predice variables continuas.','Gv9_4yMHFhI'],
+['Clasificación','PRÁCTICA','37 min','Resuelve problemas de clasificación.','0Lt9w-BxKFQ'],
+['Evaluación y validación','TEORÍA','33 min','Métricas y cross-validation.','6dbrR-WymjI'],
+['Reto: modelo predictivo','RETO','55 min','Entrena, evalúa y documenta un modelo.','aircAruvnKk']]},
+{id:'deep',title:'Deep Learning con PyTorch',cat:'data',level:'Avanzado',desc:'Redes neuronales, entrenamiento, datasets y modelos con PyTorch.',cover:'cover-data',duration:'9h 45m',lessons:[
+['Redes neuronales','TEORÍA','29 min','Perceptrón, capas y activaciones.','aircAruvnKk'],
+['Tensores y autograd','PRÁCTICA','31 min','Fundamentos de PyTorch.','IC0_FRiX-swI'],
+['Entrenamiento','PRÁCTICA','39 min','Loss, optimizadores y epochs.','V_xro1bcAuA'],
+['CNN','PRÁCTICA','42 min','Clasificación de imágenes.','pDdP0TFzsoQ'],
+['Reto: clasificador','RETO','55 min','Entrena una red neuronal funcional.','j0Vj6qV0xJ8']]},
+{id:'genai',title:'GenAI, LLMs y RAG',cat:'data',level:'Avanzado',desc:'LLMs, embeddings, RAG, prompting, evaluación y aplicaciones GenAI.',cover:'cover-data',duration:'10h 20m',lessons:[
+['Fundamentos de GenAI','TEORÍA','24 min','LLMs, tokens y contexto.','zjkBMFhNj_g'],
+['Prompt Engineering','PRÁCTICA','31 min','Diseña prompts reproducibles y evaluables.','dOxUroR3PpI'],
+['Embeddings y búsqueda vectorial','PRÁCTICA','38 min','Convierte conocimiento en recuperación semántica.','kCc8FmEb1nY'],
+['RAG end-to-end','PRÁCTICA','45 min','Construye un flujo de recuperación y generación.','T-D1OfcDW1M'],
+['Reto: asistente documental','RETO','60 min','Crea un asistente con RAG.','jkrNMK5X4sI']]},
+{id:'docker',title:'Docker y Contenedores',cat:'devops',level:'Intermedio',desc:'Imágenes, Dockerfile, Compose, redes, volúmenes y despliegues reproducibles.',cover:'',duration:'6h 15m',lessons:[
+['Contenedores desde cero','TEORÍA','21 min','Imágenes y contenedores.','3c-iBn73dDE'],
+['Dockerfile','PRÁCTICA','29 min','Empaqueta una aplicación.','k7pJ5m3M9kA'],
+['Docker Compose','PRÁCTICA','34 min','Orquesta servicios localmente.','HG6uQ0F1v3M'],
+['Redes y volúmenes','TEORÍA','27 min','Persistencia y comunicación entre servicios.','7FJQ0YpT6mY'],
+['Reto: containerizar APRENDTK','RETO','50 min','Conteneriza frontend, backend y base de datos.','3c-iBn73dDE']]},
+{id:'git',title:'Git y GitHub Profesional',cat:'devops',level:'Inicial',desc:'Flujo de trabajo Git, ramas, rebase, cherry-pick, stash y colaboración.',cover:'',duration:'5h 50m',lessons:[
+['Git desde cero','TEORÍA','20 min','Repositorios, commits y estados.','RGOj5yH7evk'],
+['Branches y merge','PRÁCTICA','27 min','Trabaja con ramas y fusiones.','FyAAfE2AqkA'],
+['Rebase, stash y cherry-pick','PRÁCTICA','35 min','Domina operaciones avanzadas.','Uszj_k0DGsg'],
+['Pull Requests','PRÁCTICA','30 min','Colabora mediante revisiones.','M7d6R2x0j4E'],
+['Reto: flujo Git profesional','RETO','40 min','Resuelve un escenario colaborativo.','RGOj5yH7evk']]},
+{id:'aws',title:'AWS Cloud Foundations',cat:'cloud',level:'Intermedio',desc:'S3, Lambda, IAM, API Gateway, RDS y arquitectura cloud.',cover:'cover-data',duration:'8h 40m',lessons:[
+['Cloud y AWS','TEORÍA','24 min','Regiones, disponibilidad y modelos cloud.','ulprqHHWlng'],
+['S3 e IAM','PRÁCTICA','34 min','Almacenamiento y permisos.','77lR0Xx5J9E'],
+['Lambda y API Gateway','PRÁCTICA','39 min','Arquitecturas serverless.','Ew7J9x4mY1I'],
+['RDS y DynamoDB','PRÁCTICA','42 min','Bases de datos administradas.','a9Q5x6cV3mI'],
+['Reto: ETL serverless','RETO','55 min','Construye un pipeline cloud.','ulprqHHWlng']]},
+{id:'azure',title:'Azure Data & Cloud',cat:'cloud',level:'Intermedio',desc:'Data Factory, ADLS, Databricks y servicios de datos en Azure.',cover:'cover-data',duration:'8h 20m',lessons:[
+['Azure Fundamentals','TEORÍA','22 min','Servicios y arquitectura.','NKEFWyqJ5sU'],
+['ADLS Gen2','PRÁCTICA','30 min','Data Lake para analítica.','8X9h5jY4V2M'],
+['Azure Data Factory','PRÁCTICA','40 min','Orquesta pipelines de datos.','Jq4W1pX8n3A'],
+['Databricks','PRÁCTICA','42 min','Procesamiento distribuido y notebooks.','P7k2V4z9m0Q'],
+['Reto: pipeline Azure','RETO','55 min','Construye un pipeline completo.','Jq4W1pX8n3A']]},
+{id:'gcp',title:'GCP Data Engineering',cat:'cloud',level:'Avanzado',desc:'BigQuery, Cloud Storage, Composer y pipelines de datos en GCP.',cover:'cover-data',duration:'8h 30m',lessons:[
+['GCP y arquitectura','TEORÍA','24 min','Servicios principales y diseño.','Kp2L0m8Q4sA'],
+['Cloud Storage','PRÁCTICA','29 min','Almacenamiento de datasets.','Qw3R9x2V5nM'],
+['BigQuery','PRÁCTICA','38 min','Analítica SQL a escala.','6Yq8T1p4Z0A'],
+['Composer / Airflow','PRÁCTICA','41 min','Orquesta workflows.','Qw3R9x2V5nM'],
+['Reto: pipeline GCP','RETO','55 min','Construye un pipeline analítico.','Kp2L0m8Q4sA']]},
+{id:'k8s',title:'Kubernetes y Orquestación',cat:'devops',level:'Avanzado',desc:'Pods, deployments, services, ingress, config y escalabilidad.',cover:'cover-python',duration:'9h 00m',lessons:[
+['Kubernetes desde cero','TEORÍA','27 min','Cluster, nodes y pods.','X48VuDVv0do'],
+['Deployments y Services','PRÁCTICA','35 min','Despliega aplicaciones.','s_o8dwzRlu4'],
+['ConfigMaps y Secrets','PRÁCTICA','30 min','Gestiona configuración segura.','X48VuDVv0do'],
+['Ingress y scaling','PRÁCTICA','39 min','Expón y escala servicios.','s_o8dwzRlu4'],
+['Reto: despliegue productivo','RETO','60 min','Despliega una plataforma multi-servicio.','X48VuDVv0do']]},
+{id:'terraform',title:'Terraform e Infrastructure as Code',cat:'devops',level:'Avanzado',desc:'Infraestructura declarativa, módulos, variables, estado y despliegue cloud.',cover:'',duration:'6h 50m',lessons:[
+['IaC y Terraform','TEORÍA','22 min','Conceptos y workflow.','tomUWcQ0P3s'],
+['Providers y resources','PRÁCTICA','31 min','Define infraestructura.','tomUWcQ0P3s'],
+['Variables y módulos','PRÁCTICA','35 min','Reutiliza infraestructura.','1w7f8x9q0zA'],
+['State y remote backend','TEORÍA','29 min','Gestiona estado colaborativo.','1w7f8x9q0zA'],
+['Reto: infraestructura cloud','RETO','50 min','Automatiza una arquitectura.','tomUWcQ0P3s']]}
 ];
 
 const labs=[
 ['Lab 01 · HTML semántico','HTML','Inicial','Construye una landing accesible.'],
-['Lab 02 · JavaScript DOM','JavaScript','Intermedio','Manipula elementos y eventos.'],
-['Lab 03 · API REST','Python / FastAPI','Intermedio','Crea endpoints para un recurso.'],
-['Lab 04 · SQL Analytics','SQL','Intermedio','Obtén KPIs mediante consultas.'],
+['Lab 02 · CSS Responsive','CSS','Inicial','Replica un dashboard adaptable.'],
+['Lab 03 · JavaScript DOM','JavaScript','Intermedio','Manipula elementos y eventos.'],
+['Lab 04 · TypeScript','TypeScript','Intermedio','Tipa una aplicación existente.'],
 ['Lab 05 · React Components','React','Intermedio','Construye componentes reutilizables.'],
-['Lab 06 · ML Pipeline','Python / ML','Avanzado','Entrena y evalúa un modelo.']
+['Lab 06 · Node REST API','Node.js','Intermedio','Crea una API REST.'],
+['Lab 07 · FastAPI','Python / FastAPI','Intermedio','Crea endpoints con validación.'],
+['Lab 08 · SQL Analytics','SQL','Intermedio','Obtén KPIs mediante consultas.'],
+['Lab 09 · PostgreSQL Tuning','PostgreSQL','Avanzado','Optimiza consultas e índices.'],
+['Lab 10 · ETL con Python','Data Engineering','Intermedio','Extrae, transforma y carga datos.'],
+['Lab 11 · Machine Learning','Python / ML','Avanzado','Entrena y evalúa un modelo.'],
+['Lab 12 · RAG','GenAI','Avanzado','Construye un mini sistema RAG.'],
+['Lab 13 · Docker Compose','Docker','Intermedio','Orquesta varios servicios.'],
+['Lab 14 · Git Workflow','Git','Inicial','Practica rebase, stash y cherry-pick.'],
+['Lab 15 · AWS Serverless','AWS','Avanzado','Integra S3, Lambda y API Gateway.'],
+['Lab 16 · Azure Data Factory','Azure','Avanzado','Diseña un pipeline ETL.'],
+['Lab 17 · BigQuery','GCP','Avanzado','Analiza datos a escala.'],
+['Lab 18 · Kubernetes','Kubernetes','Avanzado','Despliega una aplicación multi-servicio.'],
+['Lab 19 · Terraform','Terraform','Avanzado','Provisiona infraestructura como código.']
 ];
 const challenges=[
 ['API Validator','Backend','Intermedio','Valida un objeto recibido por una API.','180 XP'],
@@ -295,8 +455,65 @@ const challenges=[
 ['React Search','Frontend','Intermedio','Crea un buscador con filtrado instantáneo.','180 XP'],
 ['ETL Challenge','Data','Avanzado','Diseña un pipeline ETL reproducible.','300 XP'],
 ['Dockerize App','DevOps','Avanzado','Conteneriza una aplicación web.','250 XP'],
-['System Design','Arquitectura','Avanzado','Diseña una plataforma EdTech escalable.','400 XP']
+['Git Recovery','Git','Intermedio','Recupera cambios usando reflog y cherry-pick.','220 XP'],
+['AWS Serverless','Cloud','Avanzado','Diseña una API serverless con AWS.','350 XP'],
+['Azure Pipeline','Cloud','Avanzado','Construye un pipeline de datos en Azure.','350 XP'],
+['GCP Analytics','Cloud','Avanzado','Construye un modelo analítico en BigQuery.','350 XP'],
+['RAG Assistant','GenAI','Avanzado','Construye un asistente basado en documentos.','450 XP'],
+['ML Model Card','Machine Learning','Avanzado','Entrena, evalúa y documenta un modelo.','400 XP'],
+['Kubernetes Deploy','DevOps','Avanzado','Despliega una app con Deployment, Service e Ingress.','450 XP'],
+['Terraform Infra','Cloud','Avanzado','Define infraestructura reproducible.','400 XP'],
+['System Design','Arquitectura','Avanzado','Diseña una plataforma EdTech escalable.','500 XP']
 ];
+
+const routes=[
+{id:'fullstack',title:'Full Stack Web Developer',level:'Intermedio',duration:'48h+',desc:'Ruta completa desde HTML/CSS hasta React, Node, APIs, bases de datos y Docker.',icon:'🌐',tags:['HTML','CSS','JavaScript','React','Node.js','SQL','Docker'],courses:['html','css','js','react','node','sql','docker']},
+{id:'pythonbackend',title:'Python Backend Engineer',level:'Intermedio',duration:'38h+',desc:'Construye APIs profesionales con Python, FastAPI, PostgreSQL, testing y contenedores.',icon:'🐍',tags:['Python','FastAPI','PostgreSQL','APIs','Docker'],courses:['python','fastapi','postgres','docker']},
+{id:'dataengineer',title:'Data Engineer',level:'Avanzado',duration:'55h+',desc:'Domina SQL, Python, ETL, cloud, BigQuery, Azure Data Factory y pipelines.',icon:'📊',tags:['SQL','ETL','AWS','Azure','GCP','Airflow'],courses:['sql','pandas','data','aws','azure','gcp']},
+{id:'mlengineer',title:'Machine Learning Engineer',level:'Avanzado',duration:'52h+',desc:'Desde análisis y features hasta modelos ML, Deep Learning y despliegue reproducible.',icon:'🤖',tags:['Python','ML','PyTorch','Data','MLOps'],courses:['python','pandas','ml','deep','docker','k8s']},
+{id:'genai',title:'Generative AI Engineer',level:'Avanzado',duration:'45h+',desc:'Aprende LLMs, prompting, embeddings y RAG para crear aplicaciones GenAI.',icon:'🧠',tags:['LLMs','RAG','Embeddings','Python','APIs'],courses:['python','fastapi','genai','docker']},
+{id:'devops',title:'DevOps & Cloud Engineer',level:'Avanzado',duration:'60h+',desc:'Git, Docker, Kubernetes, Terraform y fundamentos de AWS, Azure y GCP.',icon:'☁️',tags:['Git','Docker','K8s','Terraform','Cloud'],courses:['git','docker','k8s','terraform','aws','azure','gcp']},
+{id:'cloud',title:'Cloud Data Architect',level:'Avanzado',duration:'58h+',desc:'Diseña arquitecturas de datos modernas en AWS, Azure y GCP.',icon:'🏗️',tags:['AWS','Azure','GCP','Data Lake','Pipelines'],courses:['sql','data','aws','azure','gcp','terraform']},
+{id:'software',title:'Software Engineer',level:'Intermedio',duration:'50h+',desc:'Ruta de ingeniería de software con frontend, backend, bases de datos, Git y arquitectura.',icon:'⚙️',tags:['Programming','APIs','SQL','Git','Architecture'],courses:['js','typescript','java','sql','git','docker']},
+{id:'security',title:'Secure Software Developer',level:'Avanzado',duration:'44h+',desc:'Integra validación, autenticación, secretos, contenedores y buenas prácticas de seguridad.',icon:'🔐',tags:['JWT','APIs','Docker','Cloud','Security'],courses:['js','fastapi','postgres','docker','aws']},
+{id:'edtech',title:'EdTech Builder',level:'Avanzado',duration:'65h+',desc:'Ruta orientada a construir una plataforma educativa moderna como APRENDTK.',icon:'🎓',tags:['React','APIs','SQL','Cloud','AI'],courses:['react','fastapi','postgres','genai','docker','aws','k8s']}
+];
+
+function routeProgress(route){
+ const vals=route.courses.map(id=>state.courseProgress[id]||0);
+ return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0;
+}
+function routeCard(r){
+ const p=routeProgress(r);
+ return `<article class="route-card">
+   <div class="route-cover"><span class="badge">${r.icon} ${r.level}</span><strong>${r.title}</strong></div>
+   <div class="route-body">
+     <div class="route-meta"><span>◷ ${r.duration}</span><span>▣ ${r.courses.length} cursos</span><span>📈 ${p}%</span></div>
+     <p>${r.desc}</p>
+     <div class="route-tags">${r.tags.map(t=>`<span>${t}</span>`).join('')}</div>
+     <div class="progress"><i style="width:${p}%"></i></div>
+     <div class="route-courses"><small>Cursos incluidos</small>
+       ${r.courses.slice(0,4).map(id=>{const c=courses.find(x=>x.id===id);return c?`<div class="route-course-row"><span>${c.title}</span><b>${state.courseProgress[id]||0}%</b></div>`:''}).join('')}
+       ${r.courses.length>4?`<small>+ ${r.courses.length-4} cursos más</small>`:''}
+     </div>
+     <button class="btn btn-primary" style="margin-top:12px" onclick="openRoute('${r.id}')">Ver ruta →</button>
+   </div>
+ </article>`;
+}
+function renderRoutes(){
+ document.getElementById('routeGrid').innerHTML=routes.map(routeCard).join('');
+ document.getElementById('dashboardRoutes').innerHTML=routes.slice(0,3).map(routeCard).join('');
+}
+function openRoute(id){
+ const r=routes.find(x=>x.id===id);
+ if(!r)return;
+ const first=r.courses.map(cid=>courses.find(c=>c.id===cid)).find(Boolean);
+ if(first){
+   toast(`Ruta "${r.title}" seleccionada · ${r.courses.length} cursos`);
+   openCourse(first.id);
+ }
+}
+
 
 const defaultState={name:'Estudiante',email:'estudiante@aprendtk.local',goal:'Convertirme en desarrollador Full Stack',xp:0,completed:{},courseProgress:{},activity:[1,2,1,3,2,0,1],dark:true};
 let state=JSON.parse(localStorage.getItem('aprendtk_state')||'null')||structuredClone(defaultState);
@@ -311,7 +528,7 @@ function navigate(view){
  const target=document.getElementById('view-'+view);if(target)target.classList.add('active');
  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
  document.getElementById('sidebar').classList.remove('open');window.scrollTo({top:0,behavior:'smooth'});
- if(view==='dashboard')renderDashboard(); if(view==='courses')renderCourses();if(view==='explore')renderExplore();
+ if(view==='dashboard')renderDashboard(); if(view==='courses')renderCourses();if(view==='explore')renderExplore();if(view==='routes')renderRoutes();
  if(view==='labs')renderLabs();if(view==='challenges')renderChallenges();if(view==='progress')renderProgress();if(view==='achievements')renderAchievements();if(view==='profile')renderProfile();
 }
 function courseCard(c,buttonText='Abrir curso'){
@@ -328,7 +545,7 @@ function renderDashboard(){
  document.getElementById('statStreak').textContent=Math.max(1,state.activity.filter(x=>x>0).length);
 }
 function renderCourses(filter='all'){
- document.getElementById('courseGrid').innerHTML=courses.filter(c=>filter==='all'||c.cat===filter).map(c=>courseCard(c)).join('');
+ const list=courses.filter(c=>filter==='all'||c.cat===filter);document.getElementById('courseGrid').innerHTML=list.length?list.map(c=>courseCard(c)).join(''):'<div class="empty">Aún no hay cursos en esta categoría.</div>';
 }
 function renderExplore(query=''){
  const q=query.toLowerCase();
@@ -391,7 +608,7 @@ function renderProfile(){
  document.getElementById('profileName').textContent=state.name;document.getElementById('profileEmail').textContent=state.email;document.getElementById('profileLevel').textContent=`Nivel ${level()} · ${state.xp} XP`;
  document.getElementById('nameInput').value=state.name;document.getElementById('emailInput').value=state.email;document.getElementById('goalInput').value=state.goal;
 }
-function renderAll(){renderDashboard();renderProfile()}
+function renderAll(){renderDashboard();renderProfile();renderRoutes()}
 function closeModal(){document.getElementById('helpModal').classList.remove('open')}
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.view)));
 document.getElementById('menuBtn').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
@@ -413,7 +630,7 @@ document.getElementById('hintChallenge').onclick=()=>toast('Pista: utiliza Array
 document.getElementById('saveProfile').onclick=()=>{state.name=document.getElementById('nameInput').value.trim()||'Estudiante';state.email=document.getElementById('emailInput').value.trim();state.goal=document.getElementById('goalInput').value;save();toast('Perfil actualizado ✓')};
 document.getElementById('resetData').onclick=()=>{if(confirm('¿Restablecer todo el progreso demo?')){state=structuredClone(defaultState);save();toast('Demo restablecida')}};
 document.getElementById('helpModal').addEventListener('click',e=>{if(e.target.id==='helpModal')closeModal()});
-renderAll();renderCourses();renderExplore();renderLabs();renderChallenges();runLab();
+renderAll();renderCourses();renderExplore();renderRoutes();renderLabs();renderChallenges();runLab();
 </script>
 </body>
 </html>
